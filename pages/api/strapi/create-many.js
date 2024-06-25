@@ -15,7 +15,7 @@ export default async function handler(req, res) {
                 });
             }
         });
-        res.status(200).json({ success: true, message: "Data successfully inserted into local DB!" });
+        res.status(200).json({ success: true, message: "Collection imported successfully!" });
     } catch (error) {
         res.status(500).json({
             success: false,
