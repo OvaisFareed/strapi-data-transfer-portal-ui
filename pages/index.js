@@ -12,7 +12,8 @@ export default function Home({ data, error }) {
 
   useEffect(() => {
     if (error) {
-      throw new Error(error);
+      console.log('error on url: ', error?.config?.url)
+      throw new Error(error?.message);
     }
     console.log('data: ', data)
     setCollections(data)
@@ -116,7 +117,10 @@ export default function Home({ data, error }) {
                           : <td className="w-1/12 border border-slate-300 text-center w-[70px] h-[70px] p-2">
                             <span>-</span>
                           </td>}
-                        <td className="w-4/6 border border-slate-300 pl-1">{item?.title ?? item?.label}</td>
+                        <td className="w-4/6 border border-slate-300 pl-1">{
+                          item?.title ?? item?.label ?? item?.name ?? item?.secondary ??
+                          (item?.source && item?.slug ? `${item.slug} - ${item.source}` : item?.source) ?? item?.currency_name
+                        }</td>
                       </tr>
                     )
                   })}
