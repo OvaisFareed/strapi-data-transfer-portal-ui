@@ -61,6 +61,7 @@ export const createMany = async (url, entries) => {
     let payload = {};
     try {
         for (let i = 0; i < entries.length; i++) {
+            delete entries[i].id;
             payload = { data: entries[i] }
             promises.push(axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, LOCAL_STRAPI_API_CONFIG));
         }

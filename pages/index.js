@@ -8,33 +8,33 @@ import { normalizeData } from "@/services/helper";
 export default function Home({ data, error }) {
   const [collections, setCollections] = useState([]);
   const [isRequestPending, setRequestFlag] = useState(false);
-  const [responseMessage, setResponseMessage] = useState({
-    message: '',
-    success: false
-  });
+  const [responseMessage, setResponseMessage] = useState({});
 
   useEffect(() => {
     if (error) {
       throw new Error(error);
     }
+    console.log('data: ', data)
     setCollections(data)
   }, []);
 
-  const postDataToLocal = async (collectionName) => {
+  const postDataToLocal = async (collectionName, index) => {
+    const message = { ...responseMessage };
     setRequestFlag(true);
     try {
-      const res = await axios.post(`${localAPIRoutes.CREATE_MANY}${collectionName}`, collections);
+      const res = await axios.post(`${localAPIRoutes.CREATE_MANY}${strapiAPIRoutes[collectionName]}`, collections[index].data);
       if (res.data && res.data.success) {
-        setResponseMessage(res.data);
+        message[index] = res.data;
+        setResponseMessage(message);
       }
       setRequestFlag(false);
     } catch (e) {
-      setResponseMessage({
+      message[index] = {
         message: e.message ? e.message : 'Error in inserting record(s)',
         success: false
-      });
+      };
+      setResponseMessage(message);
       setRequestFlag(false);
-      console.log('Post Error: ', e);
     }
   }
 
@@ -55,32 +55,34 @@ export default function Home({ data, error }) {
     }
   }
 
-  const closeMessageBox = () => {
-    setResponseMessage({
+  const closeMessageBox = (index) => {
+    const message = { ...responseMessage };
+    message[index] = {
       message: '',
       success: false
-    })
+    };
+    setResponseMessage(message);
   }
 
   return (
     <main className="min-h-screen p-4 container mx-auto bg-[#fff] w-full">
       <div className="flex justify-center items-center my-4">
-        <h1 className="text-2xl text-center font-medium">All collections from Remote server</h1>
+        <h1 className="text-2xl text-center font-medium">All collections from Remote Strapi</h1>
       </div>
-      {collections.map(collection => {
+      {collections.map((collection, index) => {
         return (
-          <>
-            <div className="flex justify-between items-center mb-4 w-full">
+          <div key={index}>
+            <div key={index} className="flex justify-between items-center mb-4 mt-16 w-full">
               <span className="text-xl font-bold p-1">{collection.title}</span>
-              {responseMessage.message && (
-                <span className={`flex justify-between items-center ml-4 px-3 py-1 w-[350px] rounded ${responseMessage.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                  {responseMessage.message}
+              {responseMessage[index] && responseMessage[index].message && (
+                <span className={`flex justify-between items-center ml-4 px-3 py-1 w-[350px] rounded ${responseMessage[index].success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {responseMessage[index].message}
 
-                  <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox()}>x</span>
+                  <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox(index)}>x</span>
                 </span>
               )}
               <div>
-                <button className={`bg-green-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(collection.title)}>Post to Local</button>
+                <button className={`bg-green-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(collection.title, index)}>Post to Local</button>
                 {/* <button className={`bg-red-700 text-white ml-2 px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => emptyLocalCollection()}>Empty Local Collection</button> */}
               </div>
             </div>
@@ -94,10 +96,10 @@ export default function Home({ data, error }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {collection?.data?.map((item, index) => {
+                  {collection?.data?.map((item, i) => {
                     return (
-                      <tr key={index}>
-                        <td className="w-1/12 border border-slate-300 text-center font-medium">{index + 1}</td>
+                      <tr key={i}>
+                        <td className="w-1/12 border border-slate-300 text-center font-medium">{i + 1}</td>
                         {item.image ?
                           <td className="w-1/12 border border-slate-300 text-center w-[70px] h-[70px] p-2">
                             <span style={{
@@ -121,7 +123,7 @@ export default function Home({ data, error }) {
                 </tbody>
               </table>
             </div>
-          </>
+          </div>
         )
       })}
     </main>

@@ -4,16 +4,14 @@ import { createMany } from "@/services/api-service";
 
 export default async function handler(req, res) {
     try {
-        console.log('req.query: ', req.query)
         const { path } = req.query;
         const payload = req.body;
         const response = await createMany(`${path}`, payload);
         response.some(item => {
-            if (item.status !== 'fulfilled') {
-                console.log('err resp: ', item)
-                return res.status(500).json({
+            if (item.status !== 200) {
+                return res.status(item.status).json({
                     success: false,
-                    message: item.status
+                    message: "Error in creating an entry"
                 });
             }
         });
