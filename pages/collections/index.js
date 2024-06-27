@@ -1,5 +1,5 @@
-import { localAPIRoutes, strapiAPIRoutes } from "@/constants/api-routes";
-import { getAllData } from "@/services/api-service";
+import { localAPIRoutes, strapiAPIRoutesForCollections } from "@/constants/api-routes";
+import { getAllCollections } from "@/services/api-service";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { normalizeData } from "@/services/helper";
@@ -16,7 +16,6 @@ export default function CollectionsPage({ data, error }) {
             console.log('error on url: ', error?.config?.url)
             throw new Error(error?.message);
         }
-        console.log('data: ', data)
         setCollections(data)
     }, []);
 
@@ -24,7 +23,7 @@ export default function CollectionsPage({ data, error }) {
         const message = { ...responseMessage };
         setRequestFlag(true);
         try {
-            const res = await axios.post(`${localAPIRoutes.CREATE_MANY}${strapiAPIRoutes[collectionName]}`, collections[index].data);
+            const res = await axios.post(`${localAPIRoutes.CREATE_MANY}${strapiAPIRoutesForCollections[collectionName]}`, collections[index].data);
             if (res.data && res.data.success) {
                 message[index] = res.data;
                 setResponseMessage(message);
@@ -36,23 +35,6 @@ export default function CollectionsPage({ data, error }) {
                 success: false
             };
             setResponseMessage(message);
-            setRequestFlag(false);
-        }
-    }
-
-    const emptyLocalCollection = async () => {
-        setRequestFlag(true);
-        try {
-            const res = await axios.delete(`${localAPIRoutes.DELETE_MANY}${strapiAPIRoutes.BANNER}`);
-            if (res.data && res.data.success) {
-                setResponseMessage(res.data);
-            }
-            setRequestFlag(false);
-        } catch (e) {
-            setResponseMessage({
-                message: e.message ? e.message : 'Error in deleting record(s)',
-                success: false
-            });
             setRequestFlag(false);
         }
     }
@@ -87,10 +69,10 @@ export default function CollectionsPage({ data, error }) {
 }
 
 export async function getServerSideProps() {
-    const collectionNames = Object.keys(strapiAPIRoutes);
+    const collectionNames = Object.keys(strapiAPIRoutesForCollections);
     const result = [];
     try {
-        const resp = await getAllData();
+        const resp = await getAllCollections();
         for (let i = 0; i < resp?.length; i++) {
             if (resp[i].data && resp[i].data.data) {
                 result.push({

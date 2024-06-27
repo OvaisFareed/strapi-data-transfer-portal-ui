@@ -1,9 +1,9 @@
-import { localAPIRoutes, strapiAPIRoutes } from "@/constants/api-routes";
-import { getAllData } from "@/services/api-service";
+import { localAPIRoutes, strapiAPIRoutesForSingleTypes } from "@/constants/api-routes";
+import { getAllCollections } from "@/services/api-service";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { normalizeData } from "@/services/helper";
-import { Collection } from "@/components/Collection";
+import { SingleType } from "@/components/SingleType";
 
 export default function SingleTypesPage({ data, error }) {
     const [collections, setCollections] = useState([]);
@@ -16,7 +16,6 @@ export default function SingleTypesPage({ data, error }) {
             console.log('error on url: ', error?.config?.url)
             throw new Error(error?.message);
         }
-        console.log('data: ', data)
         setCollections(data)
     }, []);
 
@@ -24,35 +23,20 @@ export default function SingleTypesPage({ data, error }) {
         const message = { ...responseMessage };
         setRequestFlag(true);
         try {
-            const res = await axios.post(`${localAPIRoutes.CREATE_MANY}${strapiAPIRoutes[collectionName]}`, collections[index].data);
+            const res = await axios.post(`${localAPIRoutes.UPDATE}${strapiAPIRoutesForSingleTypes[collectionName]}`, collections[index].data);
+            console.log('postDataToLocal res: ', res)
             if (res.data && res.data.success) {
                 message[index] = res.data;
                 setResponseMessage(message);
             }
             setRequestFlag(false);
         } catch (e) {
+            console.log('postDataToLocal err: ', e)
             message[index] = {
-                message: e.message ? e.message : 'Error in inserting record(s)',
+                message: e.message ? e.message : 'Error in inserting record',
                 success: false
             };
             setResponseMessage(message);
-            setRequestFlag(false);
-        }
-    }
-
-    const emptyLocalCollection = async () => {
-        setRequestFlag(true);
-        try {
-            const res = await axios.delete(`${localAPIRoutes.DELETE_MANY}${strapiAPIRoutes.BANNER}`);
-            if (res.data && res.data.success) {
-                setResponseMessage(res.data);
-            }
-            setRequestFlag(false);
-        } catch (e) {
-            setResponseMessage({
-                message: e.message ? e.message : 'Error in deleting record(s)',
-                success: false
-            });
             setRequestFlag(false);
         }
     }
@@ -71,7 +55,7 @@ export default function SingleTypesPage({ data, error }) {
             {collections.map((collection, index) => {
                 return (
                     <div key={index}>
-                        <Collection
+                        <SingleType
                             data={collection}
                             index={index}
                             isRequestPending={isRequestPending}
@@ -87,10 +71,10 @@ export default function SingleTypesPage({ data, error }) {
 }
 
 export async function getServerSideProps() {
-    const collectionNames = Object.keys(strapiAPIRoutes);
+    const collectionNames = Object.keys(strapiAPIRoutesForSingleTypes);
     const result = [];
     try {
-        const resp = await getAllData();
+        const resp = await getAllCollections('S');
         for (let i = 0; i < resp?.length; i++) {
             if (resp[i].data && resp[i].data.data) {
                 result.push({

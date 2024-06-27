@@ -1,15 +1,15 @@
 import { LOCAL_STRAPI_API_BASE_PATH, LOCAL_STRAPI_API_CONFIG, REMOTE_STRAPI_API_BASE_PATH, REMOTE_STRAPI_API_CONFIG } from "@/constants/environment";
 import axios from "axios";
 import { normalizeData } from "./helper";
-import { strapiAPIRoutes } from "@/constants/api-routes";
+import { mediaAPIRoutes, strapiAPIRoutesForCollections, strapiAPIRoutesForSingleTypes } from "@/constants/api-routes";
 
 /**
- * Get all data 
+ * Get all collections
  * @returns 
  */
-export const getAllData = async () => {
+export const getAllCollections = async (type = 'C') => {
     const promises = [];
-    const urls = Object.values(strapiAPIRoutes);
+    const urls = Object.values(type === 'S' ? strapiAPIRoutesForSingleTypes : strapiAPIRoutesForCollections);
     try {
         for (let i = 0; i < urls.length; i++) {
             promises.push(axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${urls[i]}?populate=*&pagination[limit]=50`, REMOTE_STRAPI_API_CONFIG));
@@ -21,16 +21,42 @@ export const getAllData = async () => {
 }
 
 /**
- * Get all data
+ * Get single collection by url
  * @param {*} url 
  * @returns 
  */
-export const getData = async (url) => {
+export const getCollectionByUrl = async (url) => {
     const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}?populate=*`, REMOTE_STRAPI_API_CONFIG);
     if (res.data && res.data.data) {
         res.data = normalizeData(res.data.data);
     }
     return JSON.parse(JSON.stringify(res.data));
+}
+
+/**
+ * Get all media
+ * @param {*} url 
+ * @returns 
+ */
+export const getAllMedia = async (url = mediaAPIRoutes.GET) => {
+    const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}`, REMOTE_STRAPI_API_CONFIG);
+    return JSON.parse(JSON.stringify(res.data));
+}
+
+/**
+ * Creates new entry
+ * @param {*} url 
+ * @param {*} payload 
+ * @returns 
+ */
+export const uploadAllMedia = async (url, payload) => {
+    try {
+        const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, LOCAL_STRAPI_API_CONFIG);
+        return JSON.parse(JSON.stringify(res.data));
+    }
+    catch (e) {
+        return JSON.parse(JSON.stringify(e));
+    }
 }
 
 /**
@@ -43,6 +69,23 @@ export const createData = async (url, payload) => {
     try {
         payload = { data: payload };
         const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, LOCAL_STRAPI_API_CONFIG);
+        return JSON.parse(JSON.stringify(res.data));
+    }
+    catch (e) {
+        return JSON.parse(JSON.stringify(e));
+    }
+}
+
+/**
+ * Updates an entry
+ * @param {*} url 
+ * @param {*} payload 
+ * @returns 
+ */
+export const updateData = async (url, payload) => {
+    try {
+        payload = { data: payload };
+        const res = await axios.put(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, LOCAL_STRAPI_API_CONFIG);
         return JSON.parse(JSON.stringify(res.data));
     }
     catch (e) {
@@ -91,6 +134,30 @@ export const deleteAllData = async (url) => {
     try {
         for (let i = 0; i < entries.length; i++) {
             promises.push(axios.delete(`${LOCAL_STRAPI_API_BASE_PATH}${url}/${entries[i].id}`, LOCAL_STRAPI_API_CONFIG));
+        }
+        Promise.all(promises)
+            .then(res => {
+                return JSON.parse(JSON.stringify(res));
+            })
+            .catch(err => {
+                return JSON.parse(JSON.stringify(err));
+            })
+    } catch (e) {
+        return JSON.parse(JSON.stringify(e));
+    }
+}
+
+/**
+ * Delete all media
+ * @param {*} url 
+ * @returns 
+ */
+export const deleteAllMedia = async (url) => {
+    const promises = [];
+    const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=1000`, LOCAL_STRAPI_API_CONFIG);
+    try {
+        for (let i = 0; i < response.data.length; i++) {
+            promises.push(axios.delete(`${LOCAL_STRAPI_API_BASE_PATH}${url}/${response.data[i].id}`, LOCAL_STRAPI_API_CONFIG));
         }
         Promise.all(promises)
             .then(res => {
