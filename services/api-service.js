@@ -51,7 +51,13 @@ export const getAllMedia = async (url = mediaAPIRoutes.GET) => {
  */
 export const uploadAllMedia = async (url, payload) => {
     try {
-        const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, LOCAL_STRAPI_API_CONFIG);
+        const options = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: LOCAL_STRAPI_API_CONFIG.headers.Authorization
+            },
+        }
+        const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
         return JSON.parse(JSON.stringify(res.data));
     }
     catch (e) {

@@ -29,7 +29,7 @@ export default function MediaPage({ data, error }) {
         let message = { ...responseMessage };
         setRequestFlag(true);
         try {
-            const res = await axios.post(`${localAPIRoutes.UPLOAD}${mediaAPIRoutes.POST}`, images);
+            const res = await axios.post(`${localAPIRoutes.UPLOAD}${mediaAPIRoutes.POST}`, [images[0]]);
             console.log('postDataToLocal res: ', res)
             if (res.data && res.data.success) {
                 message = res.data;

@@ -1,16 +1,25 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
+import { REMOTE_STRAPI_BASE_PATH } from "@/constants/environment";
 import { uploadAllMedia } from "@/services/api-service";
+import axios from "axios";
+import * as fs from 'fs';
+import * as filePath from 'path';
 
 export default async function handler(req, res) {
     try {
         const { path } = req.query;
-        const formData = new FormData();
         const payload = req.body;
+        const formData = new FormData();
         payload.forEach((file) => {
-            // formData.append(`files`, new Blob([file, { type: file.mime }]), file.name);
-            const buffer = new ArrayBuffer(1024);
-            formData.append(`files`, new Blob([file, new Uint16Array(buffer, 512, 128)]), file.name);
+            const str = file.toString('base64');
+            const buffer = Buffer.from(str, 'base64');
+            const blob = new Blob(buffer, {
+                type: 'image/jpeg'
+            });
+            // formData.append(`files`, blob, file.name);
+            console.log('blob: ', blob)
+            formData.append(`files`, blob, file.name);
         });
         await uploadAllMedia(`${path}`, formData);
         res.status(200).json({ success: true, message: "All media uploaded successfully!" });
