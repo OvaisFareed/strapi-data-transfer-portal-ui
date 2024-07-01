@@ -19,8 +19,7 @@ export const SingleType = ({
                 </span>
             )}
             <div>
-                <button className={`bg-green-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(data.title, index)}>Import to Local</button>
-                {/* <button className={`bg-red-700 text-white ml-2 px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => emptyLocalCollection()}>Empty Local Collection</button> */}
+                <button className={`bg-green-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(data.title, index)}>Import</button>
             </div>
         </div>
     )

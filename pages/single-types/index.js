@@ -16,8 +16,36 @@ export default function SingleTypesPage({ data, error }) {
             console.log('error on url: ', error?.config?.url)
             throw new Error(error?.message);
         }
+        console.log('all single types data: ', data)
         setCollections(data)
     }, []);
+
+    const importAllCollections = async () => {
+        const message = { ...responseMessage };
+        const promises = [];
+        setRequestFlag(true);
+        try {
+            for (let i = 0; i < collections.length; i++) {
+                promises.push(axios.post(`${localAPIRoutes.UPDATE}${strapiAPIRoutesForSingleTypes[collections[i].title]}`, collections[i].data))
+            }
+            const res = await Promise.all(promises);
+            if (res && res.length) {
+                message[-1] = {
+                    message: "All Single Types are imported successfully!",
+                    success: true
+                };
+                setResponseMessage(message);
+            }
+            setRequestFlag(false);
+        } catch (e) {
+            message[-1] = {
+                message: e.message ? e.message : 'Error in inserting record(s)',
+                success: false
+            };
+            setResponseMessage(message);
+            setRequestFlag(false);
+        }
+    }
 
     const postDataToLocal = async (collectionName, index) => {
         const message = { ...responseMessage };
@@ -52,6 +80,19 @@ export default function SingleTypesPage({ data, error }) {
 
     return (
         <>
+            <div className="flex justify-between items-center mb-4 mt-16 w-full">
+                <span className="text-xl font-bold p-1"></span>
+                {responseMessage[-1] && responseMessage[-1].message && (
+                    <span className={`flex justify-between items-center ml-4 px-3 py-1 w-[350px] rounded ${responseMessage[-1].success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {responseMessage[-1].message}
+
+                        <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox(-1)}>x</span>
+                    </span>
+                )}
+                <div>
+                    <button className={`bg-blue-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Single Types</button>
+                </div>
+            </div>
             {collections.map((collection, index) => {
                 return (
                     <div key={index}>

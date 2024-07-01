@@ -11,15 +11,15 @@ export default async function handler(req, res) {
         const { path } = req.query;
         const payload = req.body;
         const formData = new FormData();
+        const promises = [];
         payload.forEach((file) => {
-            const str = file.toString('base64');
-            const buffer = Buffer.from(str, 'base64');
-            const blob = new Blob(buffer, {
-                type: 'image/jpeg'
-            });
-            // formData.append(`files`, blob, file.name);
-            console.log('blob: ', blob)
-            formData.append(`files`, blob, file.name);
+            // promises.push(axios.get(`${REMOTE_STRAPI_BASE_PATH}${file.url}`));
+            promises.push(fetch(`${REMOTE_STRAPI_BASE_PATH}${file.url}`).then(r => r.blob()));
+        });
+        const result = await Promise.all(promises);
+        result.forEach(blob => {
+            // console.log('res: ', res)
+            formData.append(`files`, blob, "test.jpg");
         });
         await uploadAllMedia(`${path}`, formData);
         res.status(200).json({ success: true, message: "All media uploaded successfully!" });
