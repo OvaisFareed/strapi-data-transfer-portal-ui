@@ -18,7 +18,6 @@ export default function MediaPage({ data, error }) {
             console.log('error on url: ', error?.config?.url)
             throw new Error(error?.message);
         }
-        console.log('all media: ', data)
         if (data && data.length) {
             data = data.filter(d => d.mime !== 'application/pdf');
             setImages(data);
@@ -29,15 +28,13 @@ export default function MediaPage({ data, error }) {
         let message = { ...responseMessage };
         setRequestFlag(true);
         try {
-            const res = await axios.post(`${localAPIRoutes.UPLOAD}${mediaAPIRoutes.POST}`, [images[0]]);
-            console.log('postDataToLocal res: ', res)
+            const res = await axios.post(`${localAPIRoutes.UPLOAD}${mediaAPIRoutes.POST}`, images);
             if (res.data && res.data.success) {
                 message = res.data;
                 setResponseMessage(message);
             }
             setRequestFlag(false);
         } catch (e) {
-            console.log('postDataToLocal err: ', e)
             message = {
                 message: e.message ? e.message : 'Error in inserting record',
                 success: false
