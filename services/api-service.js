@@ -39,7 +39,13 @@ export const getCollectionByUrl = async (url) => {
  * @returns 
  */
 export const getAllMedia = async (url = mediaAPIRoutes.GET) => {
-    const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}`, REMOTE_STRAPI_API_CONFIG);
+    const options = {
+        headers: {
+            Authorization: REMOTE_STRAPI_API_CONFIG.headers.Authorization
+        },
+        // responseType: 'blob'
+    }
+    const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}?pagination[limit]=1`, options);
     return JSON.parse(JSON.stringify(res.data));
 }
 
@@ -54,12 +60,16 @@ export const uploadAllMedia = async (url, payload) => {
         const options = {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                Authorization: LOCAL_STRAPI_API_CONFIG.headers.Authorization
+                Authorization: LOCAL_STRAPI_API_CONFIG.headers.Authorization,
+                // Accept: '*/*',
+                // 'Accept-Encoding': 'gzip, deflate',
+                // Connection: 'keep-alive',
+                // 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
             },
         }
-        // const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
-        // return JSON.parse(JSON.stringify(res.data));
-        return axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
+        const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
+        return JSON.parse(JSON.stringify(res.data));
+        // return axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
     }
     catch (e) {
         console.log('uploadAllMedia e: ', e)

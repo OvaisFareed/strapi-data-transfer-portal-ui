@@ -74,19 +74,19 @@ export default function MediaPage({ data, error }) {
         <>
             <div className="flex justify-between items-center mb-8 mr-4 mt-16 w-full">
                 <div>
-                    <button className={`bg-green-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                    <button className={`bg-green-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
                         onClick={() => postDataToLocal()}
                     >
                         Upload all assests
                     </button>
-                    <button className={`bg-red-700 text-white ml-2 px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                    <button className={`bg-red-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
                         onClick={() => emptyLocalCollection()}
                     >
                         Delete all local media
                     </button>
                 </div>
                 {responseMessage && responseMessage.message && (
-                    <span className={`flex justify-between items-center ml-4 px-3 py-1 w-[350px] rounded ${responseMessage.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <span className={`flex justify-between items-center ml-4 px-3 py-2 w-[350px] rounded ${responseMessage.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {responseMessage.message}
 
                         <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox()}>x</span>

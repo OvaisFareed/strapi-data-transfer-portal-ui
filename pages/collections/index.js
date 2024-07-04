@@ -79,14 +79,14 @@ export default function CollectionsPage({ data, error }) {
             <div className="flex justify-between items-center mb-4 mt-16 w-full">
                 <span className="text-xl font-bold p-1"></span>
                 {responseMessage[-1] && responseMessage[-1].message && (
-                    <span className={`flex justify-between items-center ml-4 px-3 py-1 w-[350px] rounded ${responseMessage[-1].success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <span className={`flex justify-between items-center ml-4 px-3 py-2 w-[350px] rounded ${responseMessage[-1].success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {responseMessage[-1].message}
 
                         <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox(-1)}>x</span>
                     </span>
                 )}
                 <div>
-                    <button className={`bg-blue-700 text-white px-3 py-1 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Collections</button>
+                    <button className={`bg-blue-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Collections</button>
                 </div>
             </div>
             {collections.map((collection, index) => {

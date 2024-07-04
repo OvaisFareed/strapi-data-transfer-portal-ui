@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "async-parallel": "^1.2.3",
     "axios": "^1.7.2",
     "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "run-queue": "^2.0.1"
   },
   "devDependencies": {
     "postcss": "^8",
