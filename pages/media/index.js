@@ -19,7 +19,7 @@ export default function MediaPage({ data, error }) {
             throw new Error(error?.message);
         }
         if (data && data.length) {
-            data = data.filter(d => d.mime !== 'application/pdf');
+            data = data.filter(d => d.ext !== '.pdf' && d.ext !== '.xml');
             setImages(data);
         }
     }, []);
