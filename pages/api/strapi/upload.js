@@ -13,90 +13,52 @@ export default async function handler(req, res) {
         const { path } = req.query;
         const payload = req.body;
         const formData = new FormData();
-        const promises = [];
-        const promisesV2 = [];
-        const itemsPerPage = 400;
-        const pages = Math.floor((20) / itemsPerPage);
-        const imagesArray = new Array(pages);
+        let count = 0;
+        let intervalID = '';
+        let imageUrl = '';
+        let file = {};
+        let filesHash = {};
+        let promises = [];
+        let promisesV2 = [];
+        let missedFiles = [];
+        const avgUploadTimeInMS = 100;
+        const itemsPerPage = 100;
+        const totalItemsCount = payload.length;
+        const noOfPages = Math.round((totalItemsCount) / itemsPerPage);
+        console.log('noOfPages: ', noOfPages);
 
         /*********************
         Promise.all approach
         **********************/
-        // for (let i = 0; i < imagesArray.length; i++) {
-        //     const images = payload.slice(i * itemsPerPage, (i * itemsPerPage) + itemsPerPage);
-        const images = payload.slice(0, itemsPerPage);
-        images.forEach((file) => {
-            promises.push(axios.get(`${REMOTE_STRAPI_BASE_PATH}${file.url}`, { responseType: "arraybuffer" }));
-        });
-        const results = await Promise.all(promises);
-
-        results.forEach((res, index) => {
-            // console.log('imagesArray res.data: ', res.data);
-
-            const file = images[index];
-            const blob = new Blob([res.data], {
-                type: file.mime
+        intervalID = setInterval(async () => {
+            console.log('range: ', count * itemsPerPage, (count * itemsPerPage) + itemsPerPage)
+            console.log('count: ', count);
+            const images = payload.slice(count * itemsPerPage, (count * itemsPerPage) + itemsPerPage);
+            for (let i = 0; i < images.length; i++) {
+                file = images[i];
+                imageUrl = `${REMOTE_STRAPI_BASE_PATH}${file.url}`;
+                filesHash[imageUrl] = file;
+                promises.push(axios.get(imageUrl, { responseType: "arraybuffer" }));
+            }
+            const results = await Promise.allSettled(promises);
+            const files = results.filter(f => f.status === 'fulfilled');
+            const rejected = results.filter(f => f.status === 'rejected');
+            missedFiles = missedFiles.concat(rejected);
+            files.forEach((res, index) => {
+                const file = filesHash[res?.value?.config?.url];
+                const blob = new Blob([res.value.data], {
+                    type: file.mime
+                });
+                formData.append(`files`, blob, file.name);
             });
-            formData.append(`files`, blob, file.name);
-            formData.append(`refId`, `${index + 1}`);
-            // promisesV2.push(uploadAllMedia(`${path}`, formData));
-        });
-
-        // };
-        // console.log('formData: ', formData)
-        // await Promise.all(promisesV2);
-        await uploadAllMedia(`${path}`, formData);
-        /* 
-        ******************
-        RunQueue approach
-        ******************
-        const queue = new RunQueue({
-            maxConcurrency: 1
-        });
-        const images = payload.slice(0, itemsPerPage);
-
-        function getfile(file) {
-            return axios.get(`${REMOTE_STRAPI_BASE_PATH}${file.url}`, { responseType: "arraybuffer" });
-        }
-
-        queue.add(1, () => getfile(images[0]), [-1]);
-        for (let i = 0; i < itemsPerPage; ++i) {
-            images.forEach((file) => {
-                queue.add(0, () => getfile(file), [i]);
-            })
-        }
-        queue.run()
-            .then(res => {
-                console.log('imagesArray success', res);
-            })
-            .catch(err => {
-                console.log('imagesArray err: ', err);
-            })
-                */
-
-        /*  Async Parallel approach */
-        // const images = payload.slice(0, itemsPerPage);
-        // let i = 0;
-        // images.forEach((file) => {
-        //     promises.push(axios.get(`${REMOTE_STRAPI_BASE_PATH}${file.url}`, {
-        //         headers: {
-        //             // Accept: '*/*',
-        //             'Accept-Encoding': 'gzip, deflate',
-        //             Connection: 'keep-alive',
-        //             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
-        //         },
-        //         responseType: "arraybuffer"
-        //     }));
-        // });
-        // await Parallel.each(promises, async value => {
-        //     value.then((res) => {
-        //         console.log('success', res.data)
-        //     })
-        //         .catch(error => {
-        //             console.log('error ====> ', error?.config?.url)
-        //         })
-        // });
-        // await uploadAllMedia(`${path}`, formData)
+            promises = [];
+            count++;
+            if (count === noOfPages) {
+                console.log('clearInterval');
+                clearInterval(intervalID);
+                await uploadAllMedia(`${path}`, formData);
+            }
+        }, (totalItemsCount * avgUploadTimeInMS) / noOfPages);
         res.status(200).json({ success: true, message: "All media uploaded successfully!" });
     } catch (error) {
         console.log('uploadAllMedia err: ', error)
