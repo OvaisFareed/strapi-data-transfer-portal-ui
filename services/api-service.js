@@ -111,6 +111,28 @@ export const updateData = async (url, payload) => {
 }
 
 /**
+ * Updates media info
+ * @param {*} url 
+ * @param {*} payload 
+ * @returns 
+ */
+export const updateMediaInfo = async (url, payload) => {
+    try {
+        const options = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: LOCAL_STRAPI_API_CONFIG.headers.Authorization,
+            },
+        }
+        const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
+        return JSON.parse(JSON.stringify(res.data));
+    }
+    catch (e) {
+        return JSON.parse(JSON.stringify(e));
+    }
+}
+
+/**
  * Creates bulk entries
  * @param {*} url 
  * @param {*} entries 
@@ -171,18 +193,12 @@ export const deleteAllData = async (url) => {
  */
 export const deleteAllMedia = async (url) => {
     const promises = [];
-    const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=1000`, LOCAL_STRAPI_API_CONFIG);
+    const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=2000`, LOCAL_STRAPI_API_CONFIG);
     try {
         for (let i = 0; i < response.data.length; i++) {
             promises.push(axios.delete(`${LOCAL_STRAPI_API_BASE_PATH}${url}/${response.data[i].id}`, LOCAL_STRAPI_API_CONFIG));
         }
-        Promise.all(promises)
-            .then(res => {
-                return JSON.parse(JSON.stringify(res));
-            })
-            .catch(err => {
-                return JSON.parse(JSON.stringify(err));
-            })
+        return Promise.all(promises);
     } catch (e) {
         return JSON.parse(JSON.stringify(e));
     }

@@ -44,6 +44,28 @@ export default function MediaPage({ data, error }) {
         }
     }
 
+    const updateMediaInfo = async () => {
+        let message = { ...responseMessage };
+        setRequestFlag(true);
+        try {
+            const res = await axios.post(`${localAPIRoutes.UPDATE_MEDIA_INFO}${mediaAPIRoutes.POST}&id=36708`, {
+                alternativeText: '',
+            });
+            if (res.data && res.data.success) {
+                message = res.data;
+                setResponseMessage(message);
+            }
+            setRequestFlag(false);
+        } catch (e) {
+            message = {
+                message: e.message ? e.message : 'Error in updating media info',
+                success: false
+            };
+            setResponseMessage(message);
+            setRequestFlag(false);
+        }
+    }
+
     const emptyLocalCollection = async () => {
         setRequestFlag(true);
         try {
@@ -83,6 +105,11 @@ export default function MediaPage({ data, error }) {
                         onClick={() => emptyLocalCollection()}
                     >
                         Delete all local media
+                    </button>
+                    <button className={`bg-blue-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                        onClick={() => updateMediaInfo()}
+                    >
+                        Update media info
                     </button>
                 </div>
                 {responseMessage && responseMessage.message && (

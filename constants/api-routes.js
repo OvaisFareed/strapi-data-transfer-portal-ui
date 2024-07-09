@@ -5,6 +5,7 @@ export const localAPIRoutes = {
     DELETE_ALL_MEDIA: '/api/strapi/delete-all-media/?path=',
     GET: '/api/strapi/get/?path=',
     UPDATE: '/api/strapi/update/?path=',
+    UPDATE_MEDIA_INFO: '/api/strapi/update-media-info/?path=',
     UPLOAD: '/api/strapi/upload/?path=',
 }
 
