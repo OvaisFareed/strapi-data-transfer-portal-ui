@@ -14,7 +14,7 @@ export const getAllCollections = async (type = 'C') => {
         for (let i = 0; i < urls.length; i++) {
             promises.push(axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${urls[i]}?populate=*&pagination[limit]=50`, REMOTE_STRAPI_API_CONFIG));
         }
-        return Promise.all(promises);
+        return Promise.allSettled(promises);
     } catch (e) {
         return JSON.parse(JSON.stringify(e));
     }
@@ -26,11 +26,15 @@ export const getAllCollections = async (type = 'C') => {
  * @returns 
  */
 export const getCollectionByUrl = async (url) => {
-    const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}?populate=*`, REMOTE_STRAPI_API_CONFIG);
-    if (res.data && res.data.data) {
-        res.data = normalizeData(res.data.data);
+    try {
+        const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}?populate=*`, REMOTE_STRAPI_API_CONFIG);
+        if (res.data && res.data.data) {
+            res.data = normalizeData(res.data.data);
+        }
+        return JSON.parse(JSON.stringify(res.data));
+    } catch (e) {
+        return JSON.parse(JSON.stringify(e));
     }
-    return JSON.parse(JSON.stringify(res.data));
 }
 
 /**
@@ -39,14 +43,17 @@ export const getCollectionByUrl = async (url) => {
  * @returns 
  */
 export const getAllMedia = async (url = mediaAPIRoutes.GET) => {
-    const options = {
-        headers: {
-            Authorization: REMOTE_STRAPI_API_CONFIG.headers.Authorization
-        },
-        // responseType: 'blob'
+    try {
+        const options = {
+            headers: {
+                Authorization: REMOTE_STRAPI_API_CONFIG.headers.Authorization
+            },
+        }
+        const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}`, options);
+        return JSON.parse(JSON.stringify(res.data));
+    } catch (e) {
+        return JSON.parse(JSON.stringify(e));
     }
-    const res = await axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${url}?pagination[limit]=1`, options);
-    return JSON.parse(JSON.stringify(res.data));
 }
 
 /**
@@ -61,17 +68,12 @@ export const uploadAllMedia = async (url, payload) => {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: LOCAL_STRAPI_API_CONFIG.headers.Authorization,
-                // Accept: '*/*',
-                // 'Accept-Encoding': 'gzip, deflate',
-                // Connection: 'keep-alive',
-                // 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
             },
         }
         const res = await axios.post(`${LOCAL_STRAPI_API_BASE_PATH}${url}`, payload, options);
         return JSON.parse(JSON.stringify(res.data));
     }
     catch (e) {
-        console.log('uploadAllMedia e: ', e)
         return JSON.parse(JSON.stringify(e));
     }
 }
@@ -161,16 +163,16 @@ export const createMany = async (url, entries) => {
 export const deleteAllData = async (url) => {
     const promises = [];
     let entries = [];
-    const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=100`, LOCAL_STRAPI_API_CONFIG);
-    let dataHash = {};
-    if (response.data.data) {
-        response.data.data.forEach((item, index) => {
-            dataHash[index] = { id: item['id'], ...item['attributes'] };
-        });
-    }
-
-    entries = Object.values(dataHash);
     try {
+        const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=100`, LOCAL_STRAPI_API_CONFIG);
+        let dataHash = {};
+        if (response.data.data) {
+            response.data.data.forEach((item, index) => {
+                dataHash[index] = { id: item['id'], ...item['attributes'] };
+            });
+        }
+
+        entries = Object.values(dataHash);
         for (let i = 0; i < entries.length; i++) {
             promises.push(axios.delete(`${LOCAL_STRAPI_API_BASE_PATH}${url}/${entries[i].id}`, LOCAL_STRAPI_API_CONFIG));
         }
@@ -193,8 +195,8 @@ export const deleteAllData = async (url) => {
  */
 export const deleteAllMedia = async (url) => {
     const promises = [];
-    const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=2000`, LOCAL_STRAPI_API_CONFIG);
     try {
+        const response = await axios.get(`${LOCAL_STRAPI_API_BASE_PATH}${url}?pagination[limit]=2000`, LOCAL_STRAPI_API_CONFIG);
         for (let i = 0; i < response.data.length; i++) {
             promises.push(axios.delete(`${LOCAL_STRAPI_API_BASE_PATH}${url}/${response.data[i].id}`, LOCAL_STRAPI_API_CONFIG));
         }

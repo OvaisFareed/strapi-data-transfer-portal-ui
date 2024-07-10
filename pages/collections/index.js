@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { normalizeData } from "@/services/helper";
 import { Collection } from "@/components/Collection";
+import { promiseStatuses } from "@/constants";
 
 export default function CollectionsPage({ data, error }) {
     const [collections, setCollections] = useState([]);
@@ -13,9 +14,13 @@ export default function CollectionsPage({ data, error }) {
 
     useEffect(() => {
         if (error) {
-            throw new Error(error?.message);
+            const message = {
+                message: error?.message ?? "Error in getting one or more Collection(s)",
+                success: false
+            };
+            setResponseMessage(message);
         }
-        setCollections(data)
+        setCollections(data);
     }, []);
 
     const importAllCollections = async () => {
@@ -111,12 +116,16 @@ export async function getServerSideProps() {
     const collectionNames = Object.keys(strapiAPIRoutesForCollections);
     const result = [];
     try {
-        const resp = await getAllCollections();
+        let resp = await getAllCollections();
         for (let i = 0; i < resp?.length; i++) {
-            if (resp[i].data && resp[i].data.data) {
+            if (resp[i]?.status !== promiseStatuses.FULFILLED) {
+                continue;
+            }
+            const item = resp[i]?.value?.data;
+            if (item && item?.data) {
                 result.push({
                     title: collectionNames[i],
-                    data: normalizeData(resp[i].data.data)
+                    data: normalizeData(item?.data)
                 });
             }
         };

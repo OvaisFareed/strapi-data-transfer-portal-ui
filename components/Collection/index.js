@@ -8,6 +8,7 @@ export const Collection = ({
     postDataToLocal,
     closeMessageBox,
 }) => {
+    const dataLength = data?.data && data?.data?.length;
     return (
         <>
             <div className="flex justify-between items-center mb-4 mt-16 w-full">
@@ -19,9 +20,11 @@ export const Collection = ({
                         <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox(index)}>x</span>
                     </span>
                 )}
-                <div>
-                    <button className={`bg-green-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(data.title, index)}>Import</button>
-                </div>
+                {dataLength ? (
+                    <div>
+                        <button className={`bg-green-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(data.title, index)}>Import</button>
+                    </div>
+                ) : <></>}
             </div>
             <div className="max-h-[308px] overflow-y-scroll w-full mb-8">
                 <table className="table-auto border-collapse border border-slate-400 w-full">
@@ -32,35 +35,41 @@ export const Collection = ({
                             <th className="w-4/6 border border-slate-300">Title</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {data?.data?.map((item, i) => {
-                            return (
-                                <tr key={i}>
-                                    <td className="w-1/12 border border-slate-300 text-center font-medium">{i + 1}</td>
-                                    {item.image ?
-                                        <td className="w-1/12 border border-slate-300 text-center w-[70px] h-[70px] p-2">
-                                            <span style={{
-                                                backgroundImage: `url(${REMOTE_STRAPI_BASE_PATH}${item.image?.url})`,
-                                                height: "50px",
-                                                width: "50px",
-                                                backgroundRepeat: "no-repeat",
-                                                borderRadius: "50%",
-                                                backgroundSize: "cover",
-                                                backgroundPosition: "center",
-                                                display: "block"
-                                            }}></span>
-                                        </td>
-                                        : <td className="w-1/12 border border-slate-300 text-center w-[70px] h-[70px] p-2">
-                                            <span>-</span>
-                                        </td>}
-                                    <td className="w-4/6 border border-slate-300 pl-1">{
-                                        item?.title ?? item?.label ?? item?.name ?? item?.secondary ??
-                                        (item?.source && item?.slug ? `${item.slug} - ${item.source}` : item?.source) ?? item?.currency_name
-                                    }</td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
+                    {dataLength ? (
+                        <tbody>
+                            {data?.data?.map((item, i) => {
+                                return (
+                                    <tr key={i}>
+                                        <td className="w-1/12 border border-slate-300 text-center font-medium">{i + 1}</td>
+                                        {item.image ?
+                                            <td className="w-1/12 border border-slate-300 text-center w-[70px] h-[70px] p-2">
+                                                <span style={{
+                                                    backgroundImage: `url(${REMOTE_STRAPI_BASE_PATH}${item.image?.url})`,
+                                                    height: "50px",
+                                                    width: "50px",
+                                                    backgroundRepeat: "no-repeat",
+                                                    borderRadius: "50%",
+                                                    backgroundSize: "cover",
+                                                    backgroundPosition: "center",
+                                                    display: "block"
+                                                }}></span>
+                                            </td>
+                                            : <td className="w-1/12 border border-slate-300 text-center w-[70px] h-[70px] p-2">
+                                                <span>-</span>
+                                            </td>}
+                                        <td className="w-4/6 border border-slate-300 pl-1">{
+                                            item?.title ?? item?.label ?? item?.name ?? item?.secondary ??
+                                            (item?.source && item?.slug ? `${item.slug} - ${item.source}` : item?.source) ?? item?.currency_name
+                                        }</td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    ) : <tbody className="text-center">
+                        <tr>
+                            <td>No records found</td>
+                        </tr>
+                    </tbody>}
                 </table>
             </div>
         </>

@@ -1,5 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
+import { promiseStatuses } from "@/constants";
 import { REMOTE_STRAPI_BASE_PATH } from "@/constants/environment";
 import { uploadAllMedia } from "@/services/api-service";
 import axios from "axios";
@@ -32,8 +33,8 @@ export default async function handler(req, res) {
                 promises.push(axios.get(imageUrl, { responseType: "arraybuffer" }));
             }
             const results = await Promise.allSettled(promises);
-            const files = results.filter(f => f.status === 'fulfilled');
-            const rejected = results.filter(f => f.status === 'rejected');
+            const files = results.filter(f => f.status === promiseStatuses.FULFILLED);
+            const rejected = results.filter(f => f.status === promiseStatuses.REJECTED);
             missedFiles = missedFiles.concat(rejected);
             files.forEach((res, index) => {
                 const file = filesHash[res?.value?.config?.url];
