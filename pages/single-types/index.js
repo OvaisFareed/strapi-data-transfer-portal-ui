@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { normalizeData } from "@/services/helper";
 import { SingleType } from "@/components/SingleType";
+import { promiseStatuses } from "@/constants";
 
 export default function SingleTypesPage({ data, error }) {
     const [collections, setCollections] = useState([]);
@@ -13,10 +14,12 @@ export default function SingleTypesPage({ data, error }) {
 
     useEffect(() => {
         if (error) {
-            console.log('error on url: ', error?.config?.url)
-            throw new Error(error?.message);
+            const message = {
+                message: error?.message ?? "Error in getting one or more Single Type(s)",
+                success: false
+            };
+            setResponseMessage(message);
         }
-        console.log('all single types data: ', data)
         setCollections(data)
     }, []);
 
@@ -115,12 +118,16 @@ export async function getServerSideProps() {
     const collectionNames = Object.keys(strapiAPIRoutesForSingleTypes);
     const result = [];
     try {
-        const resp = await getAllCollections('S');
+        let resp = await getAllCollections('S');
         for (let i = 0; i < resp?.length; i++) {
-            if (resp[i].data && resp[i].data.data) {
+            if (resp[i]?.status !== promiseStatuses.FULFILLED) {
+                continue;
+            }
+            const item = resp[i]?.value?.data;
+            if (item && item?.data) {
                 result.push({
                     title: collectionNames[i],
-                    data: normalizeData(resp[i].data.data)
+                    data: normalizeData(item?.data)
                 });
             }
         };
