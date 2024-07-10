@@ -11,16 +11,16 @@ const nextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [
-      // Basic redirect
-      {
-        source: '/',
-        destination: '/collections',
-        permanent: true,
-      },
-    ]
-  },
+  // async redirects() {
+  //   return [
+  //     // Basic redirect
+  //     {
+  //       source: '/',
+  //       destination: '/collections',
+  //       permanent: true,
+  //     },
+  //   ]
+  // },
 };
 
 export default nextConfig;
