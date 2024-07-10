@@ -10,11 +10,11 @@ export const Collection = ({
     postDataToLocal,
     closeMessageBox,
 }) => {
-    const dataLength = data?.data && data?.data?.length;
+    const dataLength = data?.data && data?.data?.length ? data?.data?.length : 0;
     return (
         <>
             <div className="flex justify-between items-center mb-4 mt-16 w-full">
-                <span className="text-xl font-bold p-1">{data.title}</span>
+                <span className="text-xl font-bold p-1">{data.title} ({dataLength})</span>
                 {responseMessage[index] && responseMessage[index].message && (
                     <MessageBox response={responseMessage[index]} closeMessageBox={closeMessageBox} index={index} />
                 )}
