@@ -17,11 +17,9 @@ export default async function handler(req, res) {
         let missedFiles = [];
         const itemsPerPage = 100;
         const totalItemsCount = payload.length;
-        const noOfPages = Math.round((totalItemsCount) / itemsPerPage);
+        const noOfPages = totalItemsCount <= 100 ? 1 : Math.round((totalItemsCount) / itemsPerPage);
 
-        /*********************
-        Promise.all approach
-        **********************/
+        // Upload media page by page (100 items) in each iteration
         for (let count = 0; count < noOfPages; count++) {
             promises = [];
             formData = new FormData();
@@ -35,7 +33,9 @@ export default async function handler(req, res) {
             const results = await Promise.allSettled(promises);
             const files = results.filter(f => f.status === promiseStatuses.FULFILLED);
             const rejected = results.filter(f => f.status === promiseStatuses.REJECTED);
-            missedFiles = missedFiles.concat(rejected);
+            missedFiles = missedFiles.concat(rejected.map(file => {
+                return { url: file?.reason?.config?.url }
+            }));
             files.forEach((res, index) => {
                 const file = filesHash[res?.value?.config?.url];
                 const blob = new Blob([res.value.data], {
@@ -44,11 +44,10 @@ export default async function handler(req, res) {
                 formData.append(`files`, blob, file.name);
             });
             if (count < noOfPages) {
-                console.log(`${(count * 100) + 100} files uploaded`);
                 await uploadAllMedia(`${path}`, formData);
             }
             if (count === noOfPages - 1) {
-                console.log('missedFiles count: ', missedFiles.length);
+                console.log('missed files: ', missedFiles.length);
                 console.log('Job finished!');
                 break;
             }
@@ -58,8 +57,10 @@ export default async function handler(req, res) {
         for (let count = 0; count < missedFiles.length; count++) {
             promises = [];
             formData = new FormData();
-            for (let i = 0; i < missedFiles.length; i++) {
-                file = missedFiles[i];
+            const missed = missedFiles.slice(count * itemsPerPage, (count * itemsPerPage) + itemsPerPage);
+
+            for (let i = 0; i < missed.length; i++) {
+                file = missed[i];
                 imageUrl = `${REMOTE_STRAPI_BASE_PATH}${file.url}`;
                 filesHash[imageUrl] = file;
                 promises.push(axios.get(imageUrl, { responseType: "arraybuffer" }));
@@ -69,15 +70,14 @@ export default async function handler(req, res) {
             files.forEach((res, index) => {
                 const file = filesHash[res?.value?.config?.url];
                 const blob = new Blob([res.value.data], {
-                    type: file.mime
+                    type: file.mime ?? ""
                 });
-                formData.append(`files`, blob, file.name);
+                formData.append(`files`, blob, file.name ?? "");
             });
-            if (count < missedFiles.length) {
-                console.log(`${(count * 100) + 100} files uploaded`);
+            if (count < missed.length) {
                 await uploadAllMedia(`${path}`, formData);
             }
-            if (count === missedFiles.length - 1) {
+            if (count === missed.length - 1) {
                 console.log('missed files Job finished!');
                 break;
             }
@@ -85,7 +85,6 @@ export default async function handler(req, res) {
         res.status(200).json({ success: true, message: "All media uploaded successfully!" });
 
     } catch (error) {
-        console.log('uploadAllMedia err: ', error)
         res.status(500).json({
             success: false,
             message:
@@ -99,7 +98,7 @@ export default async function handler(req, res) {
 export const config = {
     api: {
         bodyParser: {
-            sizeLimit: '500mb' // Set desired value here
+            sizeLimit: '500mb'
         }
     }
 }

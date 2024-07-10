@@ -12,7 +12,7 @@ export const getAllCollections = async (type = 'C') => {
     const urls = Object.values(type === 'S' ? strapiAPIRoutesForSingleTypes : strapiAPIRoutesForCollections);
     try {
         for (let i = 0; i < urls.length; i++) {
-            promises.push(axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${urls[i]}?populate=*&pagination[limit]=50`, REMOTE_STRAPI_API_CONFIG));
+            promises.push(axios.get(`${REMOTE_STRAPI_API_BASE_PATH}${urls[i]}?populate=*&pagination[limit]=500`, REMOTE_STRAPI_API_CONFIG));
         }
         return Promise.allSettled(promises);
     } catch (e) {

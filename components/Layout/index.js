@@ -28,15 +28,6 @@ export const Layout = ({ children }) => {
                 setCurrentRoute={setCurrentRoute}
                 setSlug={setSlug}
             />
-            {currentRoute.includes("media") ? (
-                <Tabs
-                    data={tabs.MEDIA}
-                    currentRoute={currentRoute}
-                    slug={slug}
-                    setCurrentRoute={setCurrentRoute}
-                    setSlug={setSlug}
-                />
-            ) : <></>}
             {showLoader
                 ? (
                     <div className="flex flex-col justify-center items-center min-h-[500px]">

@@ -5,10 +5,12 @@ import axios from "axios";
 import { normalizeData } from "@/services/helper";
 import { SingleType } from "@/components/SingleType";
 import { promiseStatuses } from "@/constants";
+import { MessageBox } from "@/components/MessageBox";
+import { Spinner } from "@/components/Spinner";
 
 export default function SingleTypesPage({ data, error }) {
     const [collections, setCollections] = useState([]);
-    const [isRequestPending, setRequestFlag] = useState(false);
+    const [isRequestPending, setRequestFlag] = useState({});
     const [responseMessage, setResponseMessage] = useState({});
 
 
@@ -25,6 +27,7 @@ export default function SingleTypesPage({ data, error }) {
 
     const importAllCollections = async () => {
         const message = { ...responseMessage };
+        const requestPending = { ...isRequestPending };
         const promises = [];
         setRequestFlag(true);
         try {
@@ -39,20 +42,24 @@ export default function SingleTypesPage({ data, error }) {
                 };
                 setResponseMessage(message);
             }
-            setRequestFlag(false);
+            requestPending[-1] = false;
+            setRequestFlag(requestPending);
         } catch (e) {
             message[-1] = {
                 message: e.message ? e.message : 'Error in inserting record(s)',
                 success: false
             };
             setResponseMessage(message);
-            setRequestFlag(false);
+            requestPending[-1] = false;
+            setRequestFlag(requestPending);
         }
     }
 
     const postDataToLocal = async (collectionName, index) => {
         const message = { ...responseMessage };
-        setRequestFlag(true);
+        const requestPending = { ...isRequestPending };
+        requestPending[index] = true;
+        setRequestFlag(requestPending);
         try {
             const res = await axios.post(`${localAPIRoutes.UPDATE}${strapiAPIRoutesForSingleTypes[collectionName]}`, collections[index].data);
             console.log('postDataToLocal res: ', res)
@@ -60,7 +67,8 @@ export default function SingleTypesPage({ data, error }) {
                 message[index] = res.data;
                 setResponseMessage(message);
             }
-            setRequestFlag(false);
+            requestPending[index] = false;
+            setRequestFlag(requestPending);
         } catch (e) {
             console.log('postDataToLocal err: ', e)
             message[index] = {
@@ -68,7 +76,8 @@ export default function SingleTypesPage({ data, error }) {
                 success: false
             };
             setResponseMessage(message);
-            setRequestFlag(false);
+            requestPending[index] = false;
+            setRequestFlag(requestPending);
         }
     }
 
@@ -86,14 +95,11 @@ export default function SingleTypesPage({ data, error }) {
             <div className="flex justify-between items-center mb-4 mt-16 w-full">
                 <span className="text-xl font-bold p-1"></span>
                 {responseMessage[-1] && responseMessage[-1].message && (
-                    <span className={`flex justify-between items-center ml-4 px-3 py-2 w-[350px] rounded ${responseMessage[-1].success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {responseMessage[-1].message}
-
-                        <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox(-1)}>x</span>
-                    </span>
+                    <MessageBox response={responseMessage[-1]} closeMessageBox={closeMessageBox} index={-1} />
                 )}
-                <div>
-                    <button className={`bg-blue-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Single Types</button>
+                <div className="flex justify-between items-center">
+                    {isRequestPending[-1] ? <Spinner size="xs" color="primary" /> : <></>}
+                    <button className={`bg-blue-700 text-white px-3 py-2 ml-2 rounded ${isRequestPending[-1] ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Single Types</button>
                 </div>
             </div>
             {collections.map((collection, index) => {

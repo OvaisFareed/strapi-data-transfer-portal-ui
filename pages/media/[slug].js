@@ -5,6 +5,10 @@ import axios from "axios";
 import Image from "next/image";
 import { REMOTE_STRAPI_BASE_PATH } from "@/constants/environment";
 import { useRouter } from "next/router";
+import { Spinner } from "@/components/Spinner";
+import { MessageBox } from "@/components/MessageBox";
+import { Tabs } from "@/components/Tabs";
+import { tabs } from "@/constants";
 
 export default function MediaPage({ data, error }) {
     const router = useRouter();
@@ -31,11 +35,11 @@ export default function MediaPage({ data, error }) {
         }
     }, []);
 
-    const postDataToLocal = async () => {
+    const postDataToLocal = async (mediaFiles) => {
         let message = { ...responseMessage };
         setRequestFlag(true);
         try {
-            const res = await axios.post(`${localAPIRoutes.UPLOAD}${mediaAPIRoutes.POST}`, images);
+            const res = await axios.post(`${localAPIRoutes.UPLOAD}${mediaAPIRoutes.POST}`, mediaFiles);
             if (res.data && res.data.success) {
                 message = res.data;
                 setResponseMessage(message);
@@ -101,35 +105,43 @@ export default function MediaPage({ data, error }) {
 
     return (
         <>
+            <Tabs
+                data={tabs.MEDIA}
+                currentRoute={currentRoute}
+                slug={slug}
+                setCurrentRoute={setCurrentRoute}
+                setSlug={setSlug}
+            />
             {currentRoute.includes("images") ? (
                 <>
                     <div className="flex justify-between items-center mb-8 mr-4 mt-16 w-full">
-                        <div>
-                            <button className={`bg-green-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
-                                onClick={() => postDataToLocal()}
+                        <span className="text-xl font-bold p-1"></span>
+                        {responseMessage && responseMessage.message && (
+                            <MessageBox response={responseMessage} closeMessageBox={closeMessageBox} />
+                        )}
+
+                        <div className="flex justify-between items-center">
+                            <button className={`bg-green-700 text-white px-3 py-2 mr-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                                onClick={() => postDataToLocal(images)}
                             >
-                                Upload all assests
+                                Import all Images
                             </button>
+                            {isRequestPending ? <Spinner size="xs" color="primary" /> : <></>}
+                        </div>
+                        {/* 
+                            <div>
                             <button className={`bg-red-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
                                 onClick={() => emptyLocalCollection()}
                             >
-                                Delete all local media
-                            </button>
-                            {/* <button className={`bg-blue-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                                Delete all assests
+                            </button> */}
+                        {/* <button className={`bg-blue-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
                         onClick={() => updateMediaInfo()}
                     >
                         Update media info
-                    </button> */}
-                        </div>
-                        {responseMessage && responseMessage.message && (
-                            <span className={`flex justify-between items-center ml-4 px-3 py-2 w-[350px] rounded ${responseMessage.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {responseMessage.message}
-
-                                <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox()}>x</span>
-                            </span>
-                        )}
-                        <span className="text-xl font-bold p-1"></span>
-
+                    </button>
+                    </div>
+                    */}
                     </div>
                     <div className="flex flex-wrap">
                         {images.map((image, index) => {
@@ -140,7 +152,7 @@ export default function MediaPage({ data, error }) {
                                     width={100}
                                     height={100}
                                     key={index}
-                                    className="m-2"
+                                    className="m-2 ml-6"
                                 />
                             )
                         })}
@@ -149,37 +161,37 @@ export default function MediaPage({ data, error }) {
             ) : (
                 <>
                     <div className="flex justify-between items-center mb-8 mr-4 mt-16 w-full">
+                        {/* 
                         <div>
-                            <button className={`bg-green-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
-                                onClick={() => postDataToLocal()}
-                            >
-                                Upload all assests
-                            </button>
-                            <button className={`bg-red-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                        <button className={`bg-red-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
                                 onClick={() => emptyLocalCollection()}
                             >
                                 Delete all local media
-                            </button>
-                            {/* <button className={`bg-blue-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
-                        onClick={() => updateMediaInfo()}
-                    >
-                        Update media info
-                    </button> */}
+                            </button> */}
+                        {/* <button className={`bg-blue-700 text-white ml-2 px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                            onClick={() => updateMediaInfo()}
+                        >
+                            Update media info
+                        </button>
                         </div>
-                        {responseMessage && responseMessage.message && (
-                            <span className={`flex justify-between items-center ml-4 px-3 py-2 w-[350px] rounded ${responseMessage.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {responseMessage.message}
-
-                                <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox()}>x</span>
-                            </span>
-                        )}
+                        */}
                         <span className="text-xl font-bold p-1"></span>
-
+                        {responseMessage && responseMessage.message && (
+                            <MessageBox response={responseMessage} closeMessageBox={closeMessageBox} />
+                        )}
+                        <div className="flex justify-between items-center">
+                            <button className={`bg-green-700 text-white px-3 py-2 mr-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`}
+                                onClick={() => postDataToLocal(files)}
+                            >
+                                Import all Files
+                            </button>
+                            {isRequestPending ? <Spinner size="xs" color="primary" /> : <></>}
+                        </div>
                     </div>
                     <div className="flex flex-wrap">
                         {files.map((file, index) => {
                             return (
-                                <div className="m-2">
+                                <div className="m-2 ml-8">
                                     <div className="w-[250px] flex justify-center">
 
                                         <Image

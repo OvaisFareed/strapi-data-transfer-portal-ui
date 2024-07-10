@@ -1,4 +1,6 @@
 import { REMOTE_STRAPI_BASE_PATH } from "@/constants/environment"
+import { MessageBox } from "../MessageBox"
+import { Spinner } from "../Spinner"
 
 export const SingleType = ({
     data,
@@ -12,14 +14,12 @@ export const SingleType = ({
         <div className="flex justify-between items-center mb-4 mt-16 w-full">
             <span className="text-xl font-bold p-1">{data.title}</span>
             {responseMessage[index] && responseMessage[index].message && (
-                <span className={`flex justify-between items-center ml-4 px-3 py-2 w-[350px] rounded ${responseMessage[index].success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {responseMessage[index].message}
-
-                    <span className="text-black font-medium cursor-pointer" onClick={() => closeMessageBox(index)}>x</span>
-                </span>
+                <MessageBox response={responseMessage[index]} closeMessageBox={closeMessageBox} index={index} />
             )}
-            <div>
-                <button className={`bg-green-700 text-white px-3 py-2 rounded ${isRequestPending ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(data.title, index)}>Import</button>
+            <div className="flex justify-between items-center">
+
+                {isRequestPending[index] ? <Spinner size="xs" color="primary" /> : <></>}
+                <button className={`bg-green-700 text-white px-3 py-2 ml-2 rounded ${isRequestPending[index] ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => postDataToLocal(data.title, index)}>Import</button>
             </div>
         </div>
     )

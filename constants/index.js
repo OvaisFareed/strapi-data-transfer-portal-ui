@@ -34,3 +34,15 @@ export const tabs = {
         },
     ],
 }
+
+export const SpinnerColors = {
+    primary: 'blue',
+    secondary: 'black',
+}
+
+export const SpinnerSizes = {
+    xs: 'w-8 h-8',
+    sm: 'w-10 h-10',
+    md: 'w-16 h-16',
+    md: 'w-20 h-20',
+}
