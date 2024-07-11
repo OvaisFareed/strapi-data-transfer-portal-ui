@@ -7,6 +7,7 @@ export const localAPIRoutes = {
     UPDATE: '/api/strapi/update/?path=',
     UPDATE_MEDIA_INFO: '/api/strapi/update-media-info/?path=',
     UPLOAD: '/api/strapi/upload/?path=',
+    WRITE_FILE: '/api/write-file/?fileName=',
 }
 
 export const mediaAPIRoutes = {
