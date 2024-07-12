@@ -6,6 +6,7 @@ import { MessageBox } from "../MessageBox";
 
 export const HomeComp = () => {
     const router = useRouter();
+    const fileName = 'env.json';
     const [formValues, setFormValues] = useState({
         from: '',
         to: '',
@@ -49,19 +50,31 @@ export const HomeComp = () => {
     }
 
     const submit = async () => {
-        const fileName = 'env.json';
+        if (formValues.from) {
+            formValues.from = formValues.from.slice(0, formValues.from.length - 1);
+        }
+        if (formValues.to) {
+            formValues.to = formValues.to.slice(0, formValues.to.length - 1);
+        }
         try {
             const res = await axios.post(`${localAPIRoutes.WRITE_FILE}${fileName}`, formValues);
-            const message = {
-                message: res.message,
-                success: true
-            };
-            setResponseMessage(message);
-            setTimeout(() => {
-                router.push("/collections", undefined, {
-                    shallow: true
-                })
-            }, 2000);
+            if (res && res.data) {
+                const message = {
+                    message: `<>
+                        <p>Credentials saved successfully!</p>
+                        <br />
+                        <p>redirecting in 2 seconds...</p>
+                    </>`,
+                    success: true
+                };
+                setResponseMessage(message);
+                setTimeout(() => {
+                    router.push("/collections", undefined, {
+                        shallow: true
+                    });
+                }, 2000);
+            }
+
         }
         catch (err) {
             const message = {
@@ -82,13 +95,15 @@ export const HomeComp = () => {
 
 
     return (
-        <>
+        <main className="min-h-screen p-4 container mx-auto bg-[#fff] w-full">
             <div className="flex flex-col justify-center items-center my-16">
                 <h1 className="text-2xl text-center font-medium">Strapi Data Transfer Portal</h1>
                 <p className="text-lg text-center font-light">(transfer data between two strapi instances)</p>
             </div>
             {responseMessage && responseMessage.message && (
-                <MessageBox response={responseMessage} closeMessageBox={closeMessageBox} />
+                <div className="flex flex-col justify-center items-center w-full">
+                    <MessageBox response={responseMessage} closeMessageBox={closeMessageBox} />
+                </div>
             )}
             <div className="flex flex-col justify-center items-center w-full mt-8">
                 <form className="mb-4">
@@ -137,6 +152,6 @@ export const HomeComp = () => {
                     </button>
                 </div>
             </div>
-        </>
+        </main>
     );
 }

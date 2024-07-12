@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
+import * as env from "./constants/env.json" assert { type: "json" };
+const envr = env.default;
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "content.mtfxgroup.com",
+        hostname: `${envr.from.slice(8)}`,
         port: "",
         pathname: "/uploads/**",
       },

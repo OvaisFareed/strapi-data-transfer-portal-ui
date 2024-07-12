@@ -12,7 +12,7 @@ export default function CollectionsPage({ data, error }) {
     const [collections, setCollections] = useState([]);
     const [isRequestPending, setRequestFlag] = useState({});
     const [responseMessage, setResponseMessage] = useState({});
-
+    const [showLoader, setShowLoader] = useState(true);
 
     useEffect(() => {
         if (error) {
@@ -23,6 +23,7 @@ export default function CollectionsPage({ data, error }) {
             setResponseMessage(message);
         }
         setCollections(data);
+        setShowLoader(false);
     }, []);
 
     const importAllCollections = async () => {
@@ -91,30 +92,39 @@ export default function CollectionsPage({ data, error }) {
 
     return (
         <>
-            <div className="flex justify-between items-center mb-4 mt-16 w-full">
-                <span className="text-xl font-bold p-1"></span>
-                {responseMessage[-1] && responseMessage[-1].message && (
-                    <MessageBox response={responseMessage[-1]} closeMessageBox={closeMessageBox} index={-1} />
-                )}
-                <div className="flex justify-between items-center">
-                    {isRequestPending[-1] ? <Spinner size="xs" color="primary" /> : <></>}
-                    <button className={`bg-blue-700 text-white px-3 py-2 ml-2 rounded ${isRequestPending[-1] ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Collections</button>
-                </div>
-            </div>
-            {collections.map((collection, index) => {
-                return (
-                    <div key={index}>
-                        <Collection
-                            data={collection}
-                            index={index}
-                            isRequestPending={isRequestPending}
-                            responseMessage={responseMessage}
-                            postDataToLocal={postDataToLocal}
-                            closeMessageBox={closeMessageBox}
-                        />
+            {showLoader
+                ? (
+                    <div className="flex flex-col justify-center items-center min-h-[500px]">
+                        <Spinner />
                     </div>
-                )
-            })}
+                ) : (
+                    <>
+                        <div className="flex justify-between items-center mb-4 mt-16 w-full">
+                            <span className="text-xl font-bold p-1"></span>
+                            {responseMessage[-1] && responseMessage[-1].message && (
+                                <MessageBox response={responseMessage[-1]} closeMessageBox={closeMessageBox} index={-1} />
+                            )}
+                            <div className="flex justify-between items-center">
+                                {isRequestPending[-1] ? <Spinner size="xs" color="primary" /> : <></>}
+                                <button className={`bg-blue-700 text-white px-3 py-2 ml-2 rounded ${isRequestPending[-1] ? 'pointer-events-none cursor-wait' : ''}`} onClick={() => importAllCollections()}>Import All Collections</button>
+                            </div>
+                        </div>
+                        {collections.map((collection, index) => {
+                            return (
+                                <div key={index}>
+                                    <Collection
+                                        data={collection}
+                                        index={index}
+                                        isRequestPending={isRequestPending}
+                                        responseMessage={responseMessage}
+                                        postDataToLocal={postDataToLocal}
+                                        closeMessageBox={closeMessageBox}
+                                    />
+                                </div>
+                            )
+                        })}
+                    </>
+                )}
         </>
     )
 }

@@ -67,7 +67,7 @@ export const Collection = ({
                         </tbody>
                     ) : <tbody className="text-center">
                         <tr>
-                            <td>No records found</td>
+                            <td colSpan={3}>No records found</td>
                         </tr>
                     </tbody>}
                 </table>
