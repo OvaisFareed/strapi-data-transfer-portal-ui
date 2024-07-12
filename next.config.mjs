@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import * as env from "./constants/env.json" assert { type: "json" };
+import * as env from "./env.json" assert { type: "json" };
 const envr = env.default;
 
 const nextConfig = {

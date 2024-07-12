@@ -60,11 +60,8 @@ export const HomeComp = () => {
             const res = await axios.post(`${localAPIRoutes.WRITE_FILE}${fileName}`, formValues);
             if (res && res.data) {
                 const message = {
-                    message: `<>
-                        <p>Credentials saved successfully!</p>
-                        <br />
-                        <p>redirecting in 2 seconds...</p>
-                    </>`,
+                    message: `<p>Credentials saved successfully!</p>
+                        <p>redirecting in 2 seconds...</p>`,
                     success: true
                 };
                 setResponseMessage(message);

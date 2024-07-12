@@ -5,7 +5,8 @@ export default async function handler(req, res) {
     try {
         const { fileName } = req.query;
         const payload = req.body;
-        const filePath = path.resolve(__dirname, "../../../../constants");
+        const filePath = path.resolve(__dirname, "../../../../");
+        console.log(`${filePath}\\${fileName}`)
         fs.writeFileSync(`${filePath}\\${fileName}`, JSON.stringify(payload));
         res.status(200).json({ success: true, message: "File is written successfully!" });
     } catch (error) {
