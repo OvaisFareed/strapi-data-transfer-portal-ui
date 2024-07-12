@@ -5,7 +5,7 @@ export const MessageBox = ({ response, closeMessageBox, index = undefined }) => 
             <div dangerouslySetInnerHTML={{
                 __html: response.message
             }}></div>
-            <span className="text-black font-medium cursor-pointer" onClick={() => index === undefined ? closeMessageBox() : closeMessageBox(index)}>x</span>
+            <span className="text-gray-700 font-medium text-sm cursor-pointer" onClick={() => index === undefined ? closeMessageBox() : closeMessageBox(index)}>{`x`}</span>
         </span>
     )
 }
