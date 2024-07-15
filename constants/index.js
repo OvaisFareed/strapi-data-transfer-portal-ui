@@ -44,5 +44,10 @@ export const SpinnerSizes = {
     xs: 'w-8 h-8',
     sm: 'w-10 h-10',
     md: 'w-16 h-16',
-    md: 'w-20 h-20',
+    lg: 'w-20 h-20',
+}
+
+export const buttonStates = {
+    SUBMIT: 'Submit',
+    NEXT: 'Next',
 }

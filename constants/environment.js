@@ -4,7 +4,8 @@
 // export const REMOTE_STRAPI_API_BASE_PATH = process.env.NEXT_PUBLIC_REMOTE_STRAPI_API_BASE_PATH;
 // export const LOCAL_STRAPI_API_CONFIG = { headers: { Authorization: process.env.NEXT_PUBLIC_LOCAL_STRAPI_TOKEN } };
 // export const REMOTE_STRAPI_API_CONFIG = { headers: { Authorization: process.env.NEXT_PUBLIC_REMOTE_STRAPI_TOKEN } };
-import * as env from "../env.json";
+import * as envr from "../env.json";
+const env = envr && envr.default ? envr.default : {};
 
 export const LOCAL_STRAPI_API_BASE_PATH = `${env.to}/api`;
 export const REMOTE_STRAPI_BASE_PATH = `${env.from}`;
